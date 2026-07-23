@@ -195,7 +195,7 @@ const ProductDetail = () => {
               {/* Main image — about 1/3 of the previous size */}
               <div
                 className="flex items-center justify-center bg-white rounded-lg overflow-hidden"
-                style={{ width: '100%', maxWidth: '135px', height: '100px' }}
+                style={{ width: '100%', maxWidth: '200px', height: '150px' }}
               >
                 <img
                   src={product.images[current]}
