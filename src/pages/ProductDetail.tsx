@@ -1,10 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import NavigationBar from "@/components/NavigationBar";
 import { MapPin, Share, Heart, ArrowLeft, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,7 +33,6 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Hi, is this still available?");
-  const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [messageSent, setMessageSent] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -64,8 +61,8 @@ const ProductDetail = () => {
         const rawProduct = productData[0];
         const productDetail: ProductDetail = {
           ...rawProduct,
-          images: Array.isArray(rawProduct.images) 
-            ? rawProduct.images.map((img: any) => img.image_url) 
+          images: Array.isArray(rawProduct.images)
+            ? (rawProduct.images as Array<{ image_url: string }>).map((img) => img.image_url)
             : []
         };
         setProduct(productDetail);
@@ -99,18 +96,6 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [id, user]);
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
 
   const handleBack = () => {
     navigate(-1);
@@ -203,52 +188,51 @@ const ProductDetail = () => {
       <NavigationBar />
       
       <div className="pb-8">
-        {/* Product Image Carousel */}
-        <div className="w-full">
-          <div className="relative" style={{ width: '100%', maxWidth: '400px', height: '300px', margin: '0 auto' }}>
-            {product.images.length > 0 ? (
-              <Carousel className="w-full h-full" setApi={setApi}>
-                <CarouselContent className="ml-0">
-                  {product.images.map((imageUrl, index) => (
-                    <CarouselItem key={index} className="pl-0">
-                      <div className="flex items-center justify-center w-full h-full bg-white">
-                        <img
-                          src={imageUrl}
-                          alt={`${product.product_name} - Image ${index + 1}`}
-                          className="max-w-full max-h-full object-contain"
-                          style={{ maxWidth: '400px', maxHeight: '300px' }}
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                {product.images.length > 1 && (
-                  <>
-                    <CarouselPrevious className="left-4" />
-                    <CarouselNext className="right-4" />
-                  </>
-                )}
-              </Carousel>
-            ) : (
-              <div className="w-full h-full bg-muted/20 flex items-center justify-center">
-                <span className="text-muted-foreground text-sm font-orator">No image available</span>
-              </div>
-            )}
-          </div>
-          
-          {/* Pagination dots */}
-          {product.images.length > 1 && (
-            <div className="flex justify-center mt-3 gap-2">
-              {product.images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => api?.scrollTo(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === current ? 'bg-primary' : 'bg-primary/30'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
+        {/* Product Images: shrunk main image + thumbnail row of every uploaded image */}
+        <div className="w-full pt-3">
+          {product.images.length > 0 ? (
+            <div className="flex flex-col items-center">
+              {/* Main image — about 1/3 of the previous size */}
+              <div
+                className="flex items-center justify-center bg-white rounded-lg overflow-hidden"
+                style={{ width: '100%', maxWidth: '135px', height: '100px' }}
+              >
+                <img
+                  src={product.images[current]}
+                  alt={`${product.product_name} - Image ${current + 1}`}
+                  className="max-w-full max-h-full object-contain"
                 />
-              ))}
+              </div>
+
+              {/* Thumbnails — one per uploaded image; tap to switch the main image */}
+              {product.images.length > 1 && (
+                <div className="flex flex-wrap justify-center gap-2 mt-3">
+                  {product.images.map((imageUrl, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setCurrent(index)}
+                      className={`w-12 h-12 rounded-md overflow-hidden border-2 transition-colors ${
+                        index === current ? 'border-primary' : 'border-primary/20'
+                      }`}
+                      aria-label={`View image ${index + 1}`}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`${product.product_name} - thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div
+              className="mx-auto bg-muted/20 flex items-center justify-center rounded-lg"
+              style={{ width: '100%', maxWidth: '135px', height: '100px' }}
+            >
+              <span className="text-muted-foreground text-xs font-orator">No image available</span>
             </div>
           )}
         </div>
