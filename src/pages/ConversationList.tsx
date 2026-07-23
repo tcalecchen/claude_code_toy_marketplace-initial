@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,22 +27,37 @@ const Conversations = () => {
   const [loading, setLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
-  useEffect(() => {
-    // Only redirect if we're sure the user isn't authenticated (not during loading)
-    if (!loading && !user) {
-      navigate('/auth');
-      return;
-    }
+  const fetchUnreadCounts = useCallback(async (conversationsList: ConversationWithDetails[]) => {
+    if (!user || conversationsList.length === 0) return;
 
-    // Only fetch conversations if we have a user
-    if (user) {
-      fetchConversations();
-    }
-  }, [user, navigate, loading]);
+    try {
+      const unreadPromises = conversationsList.map(conversation =>
+        supabase.rpc('get_unread_count_for_conversation', {
+          conv_id: conversation.id
+        })
+      );
 
-  const fetchConversations = async () => {
+      const unreadResults = await Promise.all(unreadPromises);
+
+      const newUnreadCounts: Record<string, number> = {};
+      conversationsList.forEach((conversation, index) => {
+        const result = unreadResults[index];
+        if (!result.error && result.data !== null) {
+          newUnreadCounts[conversation.id] = result.data;
+        } else {
+          newUnreadCounts[conversation.id] = 0;
+        }
+      });
+
+      setUnreadCounts(newUnreadCounts);
+    } catch (error) {
+      console.error('Error fetching unread counts:', error);
+    }
+  }, [user]);
+
+  const fetchConversations = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       // Use the secure RPC to fetch conversations with all details
       const { data: conversationsData, error: conversationsError } = await supabase
@@ -58,19 +73,17 @@ const Conversations = () => {
 
       // Map the RPC results to our interface
       const processedConversations: ConversationWithDetails[] = conversationsData.map(conv => {
-        // Cast to any to access all properties that might not be in the type definition yet
-        const convAny = conv as any;
         return {
           id: conv.id,
           product_id: conv.product_id,
           seller_id: conv.seller_id,
-          buyer_id: convAny.buyer_id || '', // Access from casted object
+          buyer_id: '', // get_user_conversations does not return buyer_id
           updated_at: conv.updated_at,
           last_message_at: conv.last_message_at,
           product_name: conv.product_name || 'Unknown Product',
           first_image_url: conv.first_image_url,
           seller_name: conv.seller_name || 'Anonymous',
-          buyer_name: convAny.buyer_name || 'Anonymous', // Access from casted object
+          buyer_name: conv.buyer_name || 'Anonymous',
           last_message: conv.last_message
         };
       });
@@ -84,35 +97,20 @@ const Conversations = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, fetchUnreadCounts]);
 
-  const fetchUnreadCounts = async (conversationsList: ConversationWithDetails[]) => {
-    if (!user || conversationsList.length === 0) return;
-
-    try {
-      const unreadPromises = conversationsList.map(conversation => 
-        supabase.rpc('get_unread_count_for_conversation', {
-          conv_id: conversation.id
-        })
-      );
-
-      const unreadResults = await Promise.all(unreadPromises);
-      
-      const newUnreadCounts: Record<string, number> = {};
-      conversationsList.forEach((conversation, index) => {
-        const result = unreadResults[index];
-        if (!result.error && result.data !== null) {
-          newUnreadCounts[conversation.id] = result.data;
-        } else {
-          newUnreadCounts[conversation.id] = 0;
-        }
-      });
-
-      setUnreadCounts(newUnreadCounts);
-    } catch (error) {
-      console.error('Error fetching unread counts:', error);
+  useEffect(() => {
+    // Only redirect if we're sure the user isn't authenticated (not during loading)
+    if (!loading && !user) {
+      navigate('/auth');
+      return;
     }
-  };
+
+    // Only fetch conversations if we have a user
+    if (user) {
+      fetchConversations();
+    }
+  }, [user, navigate, loading, fetchConversations]);
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);

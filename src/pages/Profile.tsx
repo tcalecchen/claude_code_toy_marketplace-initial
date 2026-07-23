@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -27,38 +27,7 @@ const Profile = () => {
   const { products: savedProducts } = useUserSavedProducts();
   const { unreadCount } = useUnreadMessagesCount();
 
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_, session) => {
-        setUser(session?.user ?? null);
-        
-        if (!session?.user) {
-          navigate("/auth");
-        } else {
-          // Fetch user profile when authenticated
-          setTimeout(() => {
-            fetchProfile(session.user);
-          }, 0);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-
-      if (!session?.user) {
-        navigate("/auth");
-      } else {
-        fetchProfile(session.user);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const fetchProfile = async (authUser: User) => {
+  const fetchProfile = useCallback(async (authUser: User) => {
     try {
       setLoading(true);
       // Names are read through the sanctioned get_profile_names RPC (direct
@@ -93,7 +62,38 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        setUser(session?.user ?? null);
+
+        if (!session?.user) {
+          navigate("/auth");
+        } else {
+          // Fetch user profile when authenticated
+          setTimeout(() => {
+            fetchProfile(session.user);
+          }, 0);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+
+      if (!session?.user) {
+        navigate("/auth");
+      } else {
+        fetchProfile(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, fetchProfile]);
 
   const handleSignOut = async () => {
     try {

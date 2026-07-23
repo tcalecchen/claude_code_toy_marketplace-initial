@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Mail, Image as ImageIcon, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/hooks/useAuth";
-import { usePresence } from "@/contexts/PresenceProvider";
+import { usePresence } from "@/contexts/presence-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -48,6 +49,69 @@ const ConversationDetail = () => {
   const [messagesVisible, setMessagesVisible] = useState(false);
   const [conversationEntryTimestamp, setConversationEntryTimestamp] = useState<string | null>(null);
 
+  const fetchConversationDetails = useCallback(async () => {
+    if (!conversationId || !user) return;
+
+    try {
+      const { data, error } = await supabase.rpc('get_conversation_details', {
+        conv_id: conversationId,
+      });
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        setConversation(null);
+        return;
+      }
+
+      const conversationData = Array.isArray(data) ? data[0] : data;
+
+      setConversation({
+        id: conversationData.id,
+        product_id: conversationData.product_id,
+        seller_id: conversationData.seller_id,
+        buyer_id: conversationData.buyer_id,
+        product_name: conversationData.product_name || 'Unknown Product',
+        price: Number(conversationData.price) || 0,
+        first_image_url: conversationData.first_image_url || null,
+        seller_name: conversationData.seller_name || 'Anonymous',
+        buyer_name: conversationData.buyer_name || 'Anonymous',
+      });
+    } catch (error) {
+      console.error('Error fetching conversation details:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load conversation details',
+        variant: 'destructive',
+      });
+    }
+  }, [conversationId, user, toast]);
+
+  const fetchMessages = useCallback(async () => {
+    if (!conversationId) return;
+
+    try {
+      const { data, error } = await supabase.rpc('get_conversation_messages_with_read_status', {
+        conv_id: conversationId,
+      });
+      if (error) throw error;
+
+      const mapped = (data || []).map((m) => ({
+        id: m.id,
+        sender_id: m.sender_id,
+        body: m.body,
+        created_at: m.created_at,
+        is_read: !!m.is_read,
+        read_at: m.read_at ?? null,
+      })) as Message[];
+
+      setMessages(mapped);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [conversationId]);
+
   useEffect(() => {
     // Reset scroll state and visibility when conversation changes
     initialScrollDoneRef.current = false;
@@ -72,7 +136,7 @@ const ConversationDetail = () => {
       fetchConversationDetails();
       fetchMessages();
     }
-  }, [user, conversationId, navigate, loading]);
+  }, [user, conversationId, navigate, loading, fetchConversationDetails, fetchMessages]);
 
   // Real-time message subscription
   useEffect(() => {
@@ -89,7 +153,7 @@ const ConversationDetail = () => {
           filter: `conversation_id=eq.${conversationId}`
         },
         (payload) => {
-          const raw = payload.new as any;
+          const raw = payload.new as Tables<'messages'>;
           const isFromMe = raw.sender_id === user?.id;
           const newMessage: Message = {
             id: raw.id,
@@ -122,13 +186,13 @@ const ConversationDetail = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId]);
+  }, [conversationId, user?.id]);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
-  };
+  }, []);
 
-  const scrollToFirstUnread = () => {
+  const scrollToFirstUnread = useCallback(() => {
     if (!user || messages.length === 0) {
       scrollToBottom();
       return;
@@ -160,7 +224,7 @@ const ConversationDetail = () => {
       // No unread messages, scroll to bottom
       scrollToBottom();
     }
-  };
+  }, [user, messages, scrollToBottom]);
 
   useEffect(() => {
     if (!initialScrollDoneRef.current && !loading && messages.length > 0) {
@@ -172,7 +236,7 @@ const ConversationDetail = () => {
         setTimeout(() => setMessagesVisible(true), 50);
       }, 150); // Increased delay to ensure DOM is ready
     }
-  }, [loading, messages]);
+  }, [loading, messages, scrollToFirstUnread]);
 
   // Track the first unread message for persistent indicator
   // Only consider messages that arrived before the user entered this conversation
@@ -203,75 +267,12 @@ const ConversationDetail = () => {
     setFirstUnreadMessageId(null);
   }, [conversationId]);
 
-  const fetchConversationDetails = async () => {
-    if (!conversationId || !user) return;
-
-    try {
-      const { data, error } = await (supabase as any).rpc('get_conversation_details', {
-        conv_id: conversationId,
-      });
-      if (error) throw error;
-
-      if (!data || data.length === 0) {
-        setConversation(null);
-        return;
-      }
-
-      const conversationData = Array.isArray(data) ? data[0] : data;
-      
-      setConversation({
-        id: conversationData.id,
-        product_id: conversationData.product_id,
-        seller_id: conversationData.seller_id,
-        buyer_id: conversationData.buyer_id,
-        product_name: conversationData.product_name || 'Unknown Product',
-        price: Number(conversationData.price) || 0,
-        first_image_url: conversationData.first_image_url || null,
-        seller_name: conversationData.seller_name || 'Anonymous',
-        buyer_name: conversationData.buyer_name || 'Anonymous',
-      });
-    } catch (error) {
-      console.error('Error fetching conversation details:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load conversation details',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const fetchMessages = async () => {
-    if (!conversationId) return;
-
-    try {
-      const { data, error } = await (supabase as any).rpc('get_conversation_messages_with_read_status', {
-        conv_id: conversationId,
-      });
-      if (error) throw error;
-
-      const mapped = ((data as any[]) || []).map((m) => ({
-        id: m.id,
-        sender_id: m.sender_id,
-        body: m.body,
-        created_at: m.created_at,
-        is_read: !!m.is_read,
-        read_at: m.read_at ?? null,
-      })) as Message[];
-
-      setMessages(mapped);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const markMessageRead = async (messageId: string) => {
     if (!messageId) return;
     if (readMarkedRef.current.has(messageId)) return;
     readMarkedRef.current.add(messageId);
     try {
-      const { error } = await (supabase as any).rpc('mark_message_read', { msg_id: messageId });
+      const { error } = await supabase.rpc('mark_message_read', { msg_id: messageId });
       if (error) throw error;
       setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_read: true, read_at: new Date().toISOString() } : m));
     } catch (e) {

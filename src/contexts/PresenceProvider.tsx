@@ -1,21 +1,12 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { RealtimeChannel } from '@supabase/supabase-js';
-
-interface UserPresence {
-  user_id: string;
-  online_at: string;
-  username?: string;
-}
-
-interface PresenceContextType {
-  onlineUsers: Map<string, UserPresence>;
-  isUserOnline: (userId: string) => boolean;
-  getUserPresence: (userId: string) => UserPresence | null;
-}
-
-const PresenceContext = createContext<PresenceContextType | undefined>(undefined);
+import {
+  PresenceContext,
+  type PresenceContextType,
+  type UserPresence,
+} from '@/contexts/presence-context';
 
 interface PresenceProviderProps {
   children: ReactNode;
@@ -28,11 +19,14 @@ export const PresenceProvider: React.FC<PresenceProviderProps> = ({ children }) 
 
   useEffect(() => {
     if (!user) {
-      // Clean up when user logs out
-      if (channel) {
-        supabase.removeChannel(channel);
-        setChannel(null);
-      }
+      // Clean up when user logs out. Use a functional updater so we don't
+      // need `channel` as an effect dependency (which would re-subscribe).
+      setChannel((prev) => {
+        if (prev) {
+          supabase.removeChannel(prev);
+        }
+        return null;
+      });
       setOnlineUsers(new Map());
       return;
     }
@@ -48,9 +42,9 @@ export const PresenceProvider: React.FC<PresenceProviderProps> = ({ children }) 
         
         Object.entries(newState).forEach(([userId, presences]) => {
           if (presences && presences.length > 0 && typeof presences[0] === 'object') {
-            const presence = presences[0] as any;
+            const presence = presences[0] as UserPresence;
             if (presence.user_id) {
-              userMap.set(userId, presence as UserPresence);
+              userMap.set(userId, presence);
             }
           }
         });
@@ -160,12 +154,4 @@ export const PresenceProvider: React.FC<PresenceProviderProps> = ({ children }) 
       {children}
     </PresenceContext.Provider>
   );
-};
-
-export const usePresence = (): PresenceContextType => {
-  const context = useContext(PresenceContext);
-  if (context === undefined) {
-    throw new Error('usePresence must be used within a PresenceProvider');
-  }
-  return context;
 };

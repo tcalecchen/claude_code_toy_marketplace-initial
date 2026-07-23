@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Upload, Camera, Wand2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import samplePic from "@/assets/toy_bear.png";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { resizeImage } from "@/lib/imageUtils";
 import { ProductWithImage } from "@/hooks/useUserProducts";
+
+// Maximum file size: 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const IMAGE_RESIZE_WIDTH_PX = 400;
+const IMAGE_RESIZE_HEIGHT_PX = 400;
 
 const CreateListingForm = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -35,11 +40,6 @@ const CreateListingForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Maximum file size: 5MB
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-  const IMAGE_RESIZE_WIDTH_PX = 400;
-  const IMAGE_RESIZE_HEIGHT_PX = 400;
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -83,18 +83,8 @@ const CreateListingForm = () => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Check if we're in edit mode and fetch product data
-  useEffect(() => {
-    const productId = params.id;
-    if (productId) {
-      setIsEditMode(true);
-      setProductId(productId);
-      fetchProductData(productId);
-    }
-  }, [params.id]);
-
   // Fetch product data for editing
-  const fetchProductData = async (id: string) => {
+  const fetchProductData = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
       // Fetch product details
@@ -148,7 +138,17 @@ const CreateListingForm = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigate, toast]);
+
+  // Check if we're in edit mode and fetch product data
+  useEffect(() => {
+    const productId = params.id;
+    if (productId) {
+      setIsEditMode(true);
+      setProductId(productId);
+      fetchProductData(productId);
+    }
+  }, [params.id, fetchProductData]);
 
   // Fetch and prepare the sample image
   useEffect(() => {
@@ -187,7 +187,7 @@ const CreateListingForm = () => {
     if (!isEditMode) {
       loadSampleImage();
     }
-  }, [isEditMode]);
+  }, [isEditMode, toast]);
 
   const fillSampleValues = () => {
     setProductName("Toy Bear");
