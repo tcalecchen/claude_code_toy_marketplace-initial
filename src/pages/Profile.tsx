@@ -10,13 +10,9 @@ import { useUserSavedProducts } from "@/hooks/useUserSavedProducts";
 import { useUnreadMessagesCount } from "@/hooks/useUnreadMessagesCount";
 
 interface Profile {
-  id: string;
-  user_id: string;
-  email: string;
   first_name: string | null;
   last_name: string | null;
-  created_at: string;
-  updated_at: string;
+  email: string | null;
 }
 
 const Profile = () => {
@@ -42,7 +38,7 @@ const Profile = () => {
         } else {
           // Fetch user profile when authenticated
           setTimeout(() => {
-            fetchProfile(session.user.id);
+            fetchProfile(session.user);
           }, 0);
         }
       }
@@ -51,25 +47,26 @@ const Profile = () => {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      
+
       if (!session?.user) {
         navigate("/auth");
       } else {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (authUser: User) => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Names are read through the sanctioned get_profile_names RPC (direct
+      // table reads are blocked by RLS/grants). Email is intentionally kept
+      // out of every RPC, so we take it straight from the auth session.
+      const { data, error } = await supabase.rpc('get_profile_names', {
+        user_ids: [authUser.id],
+      });
 
       if (error) {
         console.error('Error fetching profile:', error);
@@ -79,7 +76,12 @@ const Profile = () => {
           variant: "destructive",
         });
       } else {
-        setProfile(data);
+        const names = data?.[0];
+        setProfile({
+          first_name: names?.first_name ?? null,
+          last_name: names?.last_name ?? null,
+          email: authUser.email ?? null,
+        });
       }
     } catch (error) {
       console.error('Error:', error);
