@@ -398,6 +398,7 @@ export type Database = {
           location: string
           price: number
           product_name: string
+          seller_joined_year: number
           seller_name: string
           stamp: string
           year_purchased: number
