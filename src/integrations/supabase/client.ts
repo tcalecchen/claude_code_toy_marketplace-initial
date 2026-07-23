@@ -5,13 +5,19 @@ import type { Database } from './types';
 // Use local Supabase for development, production URLs for production
 const isLocalDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
-const SUPABASE_URL = isLocalDevelopment 
+// TODO(remote): the production Supabase project (ref: aonhrhzuntjkskglqdwv) was
+// DELETED and no longer exists. The remote branch below is DEAD — any non-local
+// deployment will fail to reach a backend. Before deploying, create a new
+// Supabase project and replace BOTH the URL and the publishable key below with
+// the new project's values, then `supabase link` + `db push` all migrations.
+// Local development (localhost / 127.0.0.1) is unaffected.
+const SUPABASE_URL = isLocalDevelopment
   ? "http://127.0.0.1:54321"
-  : "https://aonhrhzuntjkskglqdwv.supabase.co";
+  : "https://aonhrhzuntjkskglqdwv.supabase.co"; // DEAD: project deleted — replace before deploying
 
 const SUPABASE_PUBLISHABLE_KEY = isLocalDevelopment
   ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-  : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvbmhyaHp1bnRqa3NrZ2xxZHd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczNTg0MjAsImV4cCI6MjA3MjkzNDQyMH0.a1rdJoFa910RWrZz3f6SdYNbJJ8nZhqztCzo5PJXoqA";
+  : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvbmhyaHp1bnRqa3NrZ2xxZHd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczNTg0MjAsImV4cCI6MjA3MjkzNDQyMH0.a1rdJoFa910RWrZz3f6SdYNbJJ8nZhqztCzo5PJXoqA"; // DEAD: belongs to deleted project — replace before deploying
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
