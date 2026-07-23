@@ -28,5 +28,6 @@ dist-ssr
 
 # supabase files
 supabase/.temp
+supabase/snippets/
 .mcp.json
 .env
