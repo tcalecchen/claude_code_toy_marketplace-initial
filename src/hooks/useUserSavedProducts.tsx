@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -18,7 +18,7 @@ export const useUserSavedProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSavedProducts = async () => {
+  const fetchSavedProducts = useCallback(async () => {
     if (!user) {
       setProducts([]);
       setLoading(false);
@@ -50,13 +50,13 @@ export const useUserSavedProducts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading) {
       fetchSavedProducts();
     }
-  }, [user, authLoading]);
+  }, [authLoading, fetchSavedProducts]);
 
   return { 
     products, 

@@ -1,0 +1,30 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - region "Notifications (F8)":
+      - list [ref=f3e60]:
+        - status [ref=f3e61]:
+          - generic [ref=f3e62]:
+            - generic [ref=f3e63]: Account created!
+            - generic [ref=f3e64]: Welcome! You can now start exploring the marketplace.
+          - button [ref=f3e65] [cursor=pointer]
+    - region "Notifications alt+T"
+    - generic [ref=f3e70]:
+      - banner [ref=f3e71]:
+        - button [ref=f3e72] [cursor=pointer]
+        - button [ref=f3e74] [cursor=pointer]:
+          - img "Marketplace Logo" [ref=f3e75]
+        - generic [ref=f3e76]:
+          - button [ref=f3e77] [cursor=pointer]
+          - button [ref=f3e79] [cursor=pointer]
+      - main [ref=f3e81]:
+        - generic [ref=f3e82]:
+          - generic [ref=f3e83]: WOMEN/MEN
+          - generic [ref=f3e84]:
+            - heading "Toys (1)" [level=1] [ref=f3e85]
+            - button "Filter" [ref=f3e86] [cursor=pointer]
+        - generic [ref=f3e89] [cursor=pointer]:
+          - img "Toy Bear" [ref=f3e93]
+          - generic [ref=f3e94]:
+            - heading "Toy Bear" [level=3] [ref=f3e96]
+            - generic [ref=f3e97]: $199
+  - status [ref=f3e98]: Notification Account created!Welcome! You can now start exploring the marketplace.

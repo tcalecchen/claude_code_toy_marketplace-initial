@@ -348,9 +348,11 @@ const ProductDetail = () => {
                 <div className="text-primary text-sm font-orator font-medium">
                   {product.seller_name}
                 </div>
-                <div className="text-primary/70 text-xs font-orator">
-                  Joined in {product.seller_joined_year}
-                </div>
+                {product.seller_joined_year && (
+                  <div className="text-primary/70 text-xs font-orator">
+                    Joined in {product.seller_joined_year}
+                  </div>
+                )}
               </div>
             </div>
             <div className="w-full h-px bg-primary/12 mt-4" />

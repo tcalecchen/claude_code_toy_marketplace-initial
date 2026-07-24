@@ -1,0 +1,29 @@
+- generic [ref=f6e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=f6e33]:
+    - generic [ref=f6e34]:
+      - generic [ref=f6e35]:
+        - img "Toy Bear" [ref=f6e37]
+        - generic [ref=f6e38]:
+          - heading "Toy Bear" [level=1] [ref=f6e39]
+          - paragraph [ref=f6e40]: $199
+          - generic [ref=f6e41]:
+            - paragraph [ref=f6e42]: "Buyer: Isolde Vance"
+            - generic "Offline" [ref=f6e43]
+      - button [ref=f6e44] [cursor=pointer]
+    - generic [ref=f6e48]:
+      - generic [ref=f6e49]:
+        - generic [ref=f6e50]: Today
+        - generic [ref=f6e51]: unread message below
+        - generic [ref=f6e56]:
+          - generic [ref=f6e57]: Hi! Is this still available?
+          - paragraph [ref=f6e58]: 3:41 PM
+      - generic [ref=f6e61]:
+        - generic [ref=f6e62]: Could you give me discount?
+        - paragraph [ref=f6e63]: 3:42 PM
+    - generic [ref=f6e65]:
+      - button [ref=f6e66] [cursor=pointer]
+      - textbox "Aa" [ref=f6e72]
+      - button "Send" [disabled]

@@ -1,0 +1,36 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - region "Notifications (F8)":
+      - list [ref=f5e30]:
+        - status [ref=f5e31]:
+          - generic [ref=f5e32]:
+            - generic [ref=f5e33]: Welcome back!
+            - generic [ref=f5e34]: You have been successfully signed in.
+          - button [ref=f5e35] [cursor=pointer]
+    - region "Notifications alt+T"
+    - generic [ref=f5e40]:
+      - banner [ref=f5e41]:
+        - button [ref=f5e42] [cursor=pointer]
+        - button [ref=f5e44] [cursor=pointer]:
+          - img "Marketplace Logo" [ref=f5e45]
+        - generic [ref=f5e46]:
+          - button [ref=f5e47] [cursor=pointer]
+          - button [ref=f5e49] [cursor=pointer]
+      - main [ref=f5e51]:
+        - generic [ref=f5e52]:
+          - generic [ref=f5e53]: WOMEN/MEN
+          - generic [ref=f5e54]:
+            - heading "Toys (2)" [level=1] [ref=f5e55]
+            - button "Filter" [ref=f5e56] [cursor=pointer]
+        - generic [ref=f5e58]:
+          - generic [ref=f5e59] [cursor=pointer]:
+            - img "Toy BullDozer" [ref=f5e63]
+            - generic [ref=f5e64]:
+              - heading "Toy BullDozer" [level=3] [ref=f5e66]
+              - generic [ref=f5e67]: $0
+          - generic [ref=f5e68] [cursor=pointer]:
+            - img "Toy Bear" [ref=f5e72]
+            - generic [ref=f5e73]:
+              - heading "Toy Bear" [level=3] [ref=f5e75]
+              - generic [ref=f5e76]: $199
+  - status [ref=f5e77]: Notification Welcome back!You have been successfully signed in.

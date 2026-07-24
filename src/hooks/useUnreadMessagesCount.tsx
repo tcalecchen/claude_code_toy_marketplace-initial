@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -7,7 +7,7 @@ export const useUnreadMessagesCount = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!user) {
       setUnreadCount(0);
       setLoading(false);
@@ -51,13 +51,13 @@ export const useUnreadMessagesCount = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading) {
       fetchUnreadCount();
     }
-  }, [user, authLoading]);
+  }, [authLoading, fetchUnreadCount]);
 
   return { 
     unreadCount, 
