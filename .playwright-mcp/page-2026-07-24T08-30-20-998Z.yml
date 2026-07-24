@@ -1,0 +1,44 @@
+- generic:
+  - generic:
+    - list
+    - region "Notifications alt+T"
+    - generic:
+      - banner:
+        - button [expanded]
+        - generic:
+          - button
+        - generic:
+          - button
+          - button
+      - main:
+        - generic:
+          - generic: WOMEN/MEN
+          - generic:
+            - heading [level=1]: Toys (2)
+            - button: Filter
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - heading [level=3]: Toy BullDozer
+                - generic: $0
+            - generic:
+              - generic:
+                - generic:
+                  - heading [level=3]: Toy Bear
+                - generic: $199
+  - dialog [ref=e43]:
+    - generic [ref=e44]:
+      - heading "Menu" [level=2] [ref=e45]
+      - button "Close menu" [active] [ref=e46] [cursor=pointer]
+    - navigation [ref=e48]:
+      - link "I want to sell" [ref=e49] [cursor=pointer]:
+        - /url: /create-listing
+      - link "I want to buy" [ref=e50] [cursor=pointer]:
+        - /url: /categories
+      - link "My Saved Items" [ref=e51] [cursor=pointer]:
+        - /url: /saved-items
+      - link "About Marketplace" [ref=e52] [cursor=pointer]:
+        - /url: /about
+    - generic [ref=e53]: Main navigation menu with links to sell items, browse categories, view saved items, and learn about the marketplace

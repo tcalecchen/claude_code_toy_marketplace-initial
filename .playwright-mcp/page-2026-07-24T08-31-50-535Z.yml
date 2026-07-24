@@ -1,0 +1,43 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - region "Notifications (F8)":
+      - list [ref=f6e93]:
+        - status [ref=f6e94]:
+          - generic [ref=f6e95]:
+            - generic [ref=f6e96]: Listing published
+            - generic [ref=f6e97]: Your product has been posted.
+          - button [ref=f6e98] [cursor=pointer]
+    - region "Notifications alt+T"
+    - generic [ref=f6e103]:
+      - banner [ref=f6e104]:
+        - button [ref=f6e105] [cursor=pointer]
+        - button [ref=f6e107] [cursor=pointer]:
+          - img "Marketplace Logo" [ref=f6e108]
+        - generic [ref=f6e109]:
+          - button [ref=f6e110] [cursor=pointer]
+          - button [ref=f6e112] [cursor=pointer]
+      - main [ref=f6e114]:
+        - link [ref=f6e116] [cursor=pointer]:
+          - /url: /create-listing/new
+          - button "+ Create listing" [ref=f6e117]
+        - generic [ref=f6e119]:
+          - heading "Overview" [level=1] [ref=f6e120]
+          - paragraph [ref=f6e121]: Your active listings
+        - generic [ref=f6e122]:
+          - generic [ref=f6e123] [cursor=pointer]:
+            - img "Blue Whale Plush Toy" [ref=f6e127]
+            - generic [ref=f6e128]:
+              - generic [ref=f6e129]:
+                - heading "Blue Whale Plush Toy" [level=3] [ref=f6e130]
+                - link "Edit" [ref=f6e131]:
+                  - /url: /create-listing/edit/056d1804-de68-4477-9e01-405827568579
+              - generic [ref=f6e132]: $89
+          - generic [ref=f6e133] [cursor=pointer]:
+            - img "Toy Bear" [ref=f6e137]
+            - generic [ref=f6e138]:
+              - generic [ref=f6e139]:
+                - heading "Toy Bear" [level=3] [ref=f6e140]
+                - link "Edit" [ref=f6e141]:
+                  - /url: /create-listing/edit/e54e69c7-7d24-4eb0-953b-688585fdc333
+              - generic [ref=f6e142]: $199
+  - status [ref=f6e143]: Notification Listing publishedYour product has been posted.
