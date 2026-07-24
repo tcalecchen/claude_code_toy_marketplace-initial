@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import NavigationBar from "@/components/NavigationBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,37 @@ import { ProductWithImage } from "@/hooks/useUserProducts";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 const IMAGE_RESIZE_WIDTH_PX = 400;
 const IMAGE_RESIZE_HEIGHT_PX = 400;
+
+// Words that are not allowed in a product listing. Matches are reported to
+// Sentry so we can monitor abuse of the create-listing form.
+const BANNED_WORDS = [
+  "fuck",
+  "shit",
+  "bitch",
+  "asshole",
+  "bastard",
+  "murder",
+  "kill",
+];
+
+// Scan the given text fields for banned words and return every match found.
+// Matching is case-insensitive and word-boundary aware (so "skill" won't match
+// "kill", but "Kill" and "KILL" will).
+const findBannedWords = (
+  fields: Record<string, string>
+): { word: string; field: string }[] => {
+  const hits: { word: string; field: string }[] = [];
+  for (const [field, value] of Object.entries(fields)) {
+    if (!value) continue;
+    for (const word of BANNED_WORDS) {
+      const pattern = new RegExp(`\\b${word}\\b`, "i");
+      if (pattern.test(value)) {
+        hits.push({ word, field });
+      }
+    }
+  }
+  return hits;
+};
 
 const CreateListingForm = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -212,6 +244,48 @@ const CreateListingForm = () => {
     try {
       if (!user) {
         toast({ title: "Please sign in", description: "You must be logged in to publish.", variant: "destructive" });
+        return;
+      }
+
+      // Content moderation: check the listing's text fields for banned words and
+      // report any matches to Sentry.
+      const bannedHits = findBannedWords({
+        product_name: productName,
+        color,
+        leather,
+        stamp,
+        location,
+        description,
+      });
+
+      if (bannedHits.length > 0) {
+        const summary = bannedHits
+          .map((hit) => `"${hit.word}" in ${hit.field}`)
+          .join(", ");
+
+        Sentry.captureMessage(
+          `Inappropriate content detected in product listing: ${summary}`,
+          {
+            level: "warning",
+            tags: {
+              feature: "create-listing",
+              moderation: "banned-words",
+            },
+            extra: {
+              userId: user.id,
+              productName,
+              matches: bannedHits,
+            },
+          }
+        );
+
+        toast({
+          title: "Inappropriate content detected",
+          description: `Please remove: ${bannedHits
+            .map((hit) => hit.word)
+            .join(", ")}.`,
+          variant: "destructive",
+        });
         return;
       }
 

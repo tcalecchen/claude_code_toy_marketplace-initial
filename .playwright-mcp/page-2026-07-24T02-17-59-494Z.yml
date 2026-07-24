@@ -1,0 +1,4 @@
+- generic [ref=e39]:
+  - heading "Something went wrong" [level=1] [ref=e40]
+  - paragraph [ref=e41]: The error has been reported. You can try again.
+  - button "Go back home" [ref=e42] [cursor=pointer]

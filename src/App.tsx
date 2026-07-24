@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -20,13 +21,32 @@ import SavedItems from "./pages/SavedItems";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <PresenceProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+  <Sentry.ErrorBoundary
+    fallback={({ resetError }) => (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <h1 className="text-xl font-medium">Something went wrong</h1>
+        <p className="text-muted-foreground">
+          The error has been reported. You can try again.
+        </p>
+        <button
+          className="underline"
+          onClick={() => {
+            resetError();
+            window.location.assign("/");
+          }}
+        >
+          Go back home
+        </button>
+      </div>
+    )}
+  >
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <PresenceProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
             <Route path="/" element={<Categories />} />
             <Route path="/create-listing" element={<CreateListing />} />
             <Route path="/create-listing/new" element={<CreateListingForm />} />
@@ -41,11 +61,12 @@ const App = () => (
             <Route path="/saved-items" element={<SavedItems />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </PresenceProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+            </Routes>
+          </BrowserRouter>
+        </PresenceProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </Sentry.ErrorBoundary>
 );
 
 export default App;
