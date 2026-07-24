@@ -425,6 +425,13 @@ export type Database = {
         Args: { conv_id: string }
         Returns: number
       }
+      get_unread_counts_for_user: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          conversation_id: string
+          unread_count: number
+        }[]
+      }
       get_user_conversation_for_product: {
         Args: { prod_id: string }
         Returns: {

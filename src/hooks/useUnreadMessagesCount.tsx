@@ -16,33 +16,16 @@ export const useUnreadMessagesCount = () => {
 
     try {
       setLoading(true);
-      
-      // Get all user conversations
-      const { data: conversations, error: conversationsError } = await supabase
-        .rpc('get_user_conversations');
 
-      if (conversationsError) throw conversationsError;
+      // Single batched RPC returns per-conversation unread counts; sum them.
+      const { data, error } = await supabase.rpc('get_unread_counts_for_user');
 
-      let totalUnread = 0;
+      if (error) throw error;
 
-      // Get unread count for each conversation
-      if (conversations && conversations.length > 0) {
-        const unreadPromises = conversations.map(conversation => 
-          supabase.rpc('get_unread_count_for_conversation', {
-            conv_id: conversation.id
-          })
-        );
-
-        const unreadResults = await Promise.all(unreadPromises);
-        
-        totalUnread = unreadResults.reduce((sum, result) => {
-          if (result.error) {
-            console.error('Error fetching unread count:', result.error);
-            return sum;
-          }
-          return sum + (result.data || 0);
-        }, 0);
-      }
+      const totalUnread = (data || []).reduce(
+        (sum, row) => sum + (row.unread_count || 0),
+        0
+      );
 
       setUnreadCount(totalUnread);
     } catch (error) {

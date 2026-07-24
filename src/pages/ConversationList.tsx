@@ -27,26 +27,18 @@ const Conversations = () => {
   const [loading, setLoading] = useState(true);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
 
-  const fetchUnreadCounts = useCallback(async (conversationsList: ConversationWithDetails[]) => {
-    if (!user || conversationsList.length === 0) return;
+  const fetchUnreadCounts = useCallback(async () => {
+    if (!user) return;
 
     try {
-      const unreadPromises = conversationsList.map(conversation =>
-        supabase.rpc('get_unread_count_for_conversation', {
-          conv_id: conversation.id
-        })
-      );
+      // Single batched RPC returns one row per conversation the user is in.
+      const { data, error } = await supabase.rpc('get_unread_counts_for_user');
 
-      const unreadResults = await Promise.all(unreadPromises);
+      if (error) throw error;
 
       const newUnreadCounts: Record<string, number> = {};
-      conversationsList.forEach((conversation, index) => {
-        const result = unreadResults[index];
-        if (!result.error && result.data !== null) {
-          newUnreadCounts[conversation.id] = result.data;
-        } else {
-          newUnreadCounts[conversation.id] = 0;
-        }
+      (data || []).forEach(row => {
+        newUnreadCounts[row.conversation_id] = row.unread_count ?? 0;
       });
 
       setUnreadCounts(newUnreadCounts);
@@ -89,9 +81,9 @@ const Conversations = () => {
       });
 
       setConversations(processedConversations);
-      
-      // Fetch unread counts for each conversation
-      await fetchUnreadCounts(processedConversations);
+
+      // Fetch unread counts for all conversations in one batched RPC
+      await fetchUnreadCounts();
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
