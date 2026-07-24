@@ -1,0 +1,46 @@
+- generic [ref=f4e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=f4e3]:
+    - banner [ref=f4e4]:
+      - button [ref=f4e5] [cursor=pointer]
+      - button [ref=f4e7] [cursor=pointer]:
+        - img "Marketplace Logo" [ref=f4e8]
+      - generic [ref=f4e9]:
+        - button [ref=f4e10] [cursor=pointer]
+        - button [ref=f4e12] [cursor=pointer]
+    - generic [ref=f4e14]:
+      - heading "Account" [level=1] [ref=f4e16]
+      - generic [ref=f4e17]:
+        - heading "Profile information" [level=2] [ref=f4e19]
+        - generic [ref=f4e20]:
+          - generic [ref=f4e21]:
+            - generic [ref=f4e22]: Name
+            - generic [ref=f4e23]: Dashiell Thorne
+          - generic [ref=f4e24]:
+            - generic [ref=f4e25]: E-mail
+            - generic [ref=f4e26]: dashiell.thorne.p5824@example.com
+          - generic [ref=f4e27]:
+            - generic [ref=f4e28]: Password
+            - generic [ref=f4e29]: "**********"
+      - generic [ref=f4e30]:
+        - heading "Activity" [level=2] [ref=f4e31]
+        - generic [ref=f4e32]:
+          - generic [ref=f4e33]:
+            - generic [ref=f4e34]: You have (0) listings
+            - link "View listings" [ref=f4e35] [cursor=pointer]:
+              - /url: /create-listing
+          - generic [ref=f4e36]:
+            - generic [ref=f4e37]: You have (0) unread messages
+            - link "View messages" [ref=f4e38] [cursor=pointer]:
+              - /url: /messages
+          - generic [ref=f4e39]:
+            - generic [ref=f4e40]: You have (0) saved products
+            - link "View all saved products" [ref=f4e41] [cursor=pointer]:
+              - /url: /saved-items
+      - generic [ref=f4e42]:
+        - link [ref=f4e43] [cursor=pointer]:
+          - /url: /
+          - button "Return Home" [ref=f4e44]
+        - button "Sign Out" [ref=f4e45] [cursor=pointer]

@@ -1,0 +1,28 @@
+- generic [ref=f2e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=f2e197]:
+    - generic [ref=f2e198]:
+      - generic [ref=f2e199]:
+        - img "Toy Bear" [ref=f2e201]
+        - generic [ref=f2e202]:
+          - heading "Toy Bear" [level=1] [ref=f2e203]
+          - paragraph [ref=f2e204]: $199
+          - generic [ref=f2e205]:
+            - paragraph [ref=f2e206]: "Seller: user001 Lai"
+            - generic "Online" [ref=f2e207]
+      - button [ref=f2e208] [cursor=pointer]
+    - generic [ref=f2e212]:
+      - generic [ref=f2e213]:
+        - generic [ref=f2e214]: Today
+        - generic [ref=f2e216]:
+          - generic [ref=f2e217]: Hi! Is this still available?
+          - paragraph [ref=f2e218]: 3:41 PM
+      - generic [ref=f2e231]:
+        - generic [ref=f2e232]: Could you give me discount?
+        - paragraph [ref=f2e233]: 3:42 PM
+    - generic [ref=f2e220]:
+      - button [ref=f2e221] [cursor=pointer]
+      - textbox "Aa" [ref=f2e227]
+      - button "Send" [disabled]
